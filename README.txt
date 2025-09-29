@@ -1,6 +1,4 @@
-#  Astronomical App using NASA API – Astronomy Picture of the Day (APOD)
-
-
+# Astronomical App using NASA API – Astronomy Picture of the Day (APOD)
 
 ---
 
