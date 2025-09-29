@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>NASA APOD Viewer</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+
+    <!-- MDB (optional) -->
+    <link rel="stylesheet" href="css/mdb.min.css" />
+
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Roboto", sans-serif;
+        color: #fff;
+      }
+
+      /* Background video */
+      #bg-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: -2;
+        object-fit: cover;
+      }
+
+      /* Dark overlay */
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1;
+      }
+
+      /* Main app wrapper */
+      .app-wrapper {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 30px;
+        
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 2px 8px rgba(255,255,255,0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .app-wrapper:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6), inset 0 2px 12px rgba(255,255,255,0.15);
+      }
+
+      .input-group { max-width: 400px; }
+      #wrapper-media img { display: block; max-height: 70vh; object-fit: cover; border-radius: 12px; }
+      .loading-text { padding: 2rem; text-align: center; color: #ddd; }
+
+      /* Info card inside wrapper */
+      .info-card {
+        background: rgba(0,0,0,0.5);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: inset 0 2px 8px rgba(255,255,255,0.1);
+      }
+
+      .btn-custom { margin-right: 8px; }
+    </style>
+  </head>
+  <body>
+    <!-- Background video -->
+    <video autoplay muted loop id="bg-video">
+      <source src="./img/istockphoto-1270215944-640_adpp_is.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div id="overlay"></div>
+
+    <div class="container my-5">
+      <div class="app-wrapper">
+        <!-- Controls -->
+        <div class="d-flex flex-wrap mb-4 gap-2">
+          <div class="input-group">
+            <input
+              type="text"
+              id="wrapper-date"
+              class="form-control"
+              placeholder="Select a date (YYYY-MM-DD)"
+              aria-label="Select a date"
+            />
+            <button class="btn btn-outline-light" id="datepicker-btn" type="button" aria-label="Open calendar">
+              <i class="fa fa-calendar-alt"></i>
+            </button>
+          </div>
+          <button class="btn btn-primary btn-custom" id="today-btn"><i class="fa fa-sun"></i> Today</button>
+          <button class="btn btn-warning btn-custom" id="random-btn"><i class="fa fa-random"></i> Random</button>
+          <button class="btn btn-success btn-custom d-none" id="download-btn"><i class="fa fa-download"></i> Download</button>
+        </div>
+
+        <div class="row">
+          <!-- Media Wrapper -->
+          <div class="col-md-8 mb-4 mb-md-0">
+            <section id="wrapper-media"></section>
+          </div>
+
+          <!-- Info Wrapper -->
+          <div class="col-md-4 mb-4 mb-md-0">
+            <div class="info-card">
+              <h5 id="wrapper-title"></h5>
+              <p class="mb-2 text-muted">Copyright <span id="wrapper-copywrite"></span></p>
+              <p class="mb-2" id="wrapper-explanation"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- MDB -->
+    <script src="js/mdb.umd.min.js"></script>
+
+    <script>
+      const API_KEY = 'apIjpe3XDA1VOqgQ0KC2RTYmqz6T1pb0knrDaLay';
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"'`=\/]/g, s => ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+        })[s]);
+      }
+
+      const fp = flatpickr("#wrapper-date", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        allowInput: true
+      });
+
+      document.getElementById('datepicker-btn').addEventListener('click', () => fp.open());
+      fp.config.onChange.push(function(_, dateStr) { fetchAPOD(dateStr); });
+      document.getElementById('wrapper-date').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); fetchAPOD(this.value.trim()); }
+      });
+
+      document.getElementById('today-btn').addEventListener('click', () => fetchAPOD(''));
+      document.getElementById('random-btn').addEventListener('click', fetchRandomAPOD);
+
+      async function fetchAPOD(date = '') {
+        const container = document.getElementById('wrapper-media');
+        container.innerHTML = '<div class="loading-text">Loading…</div>';
+        document.getElementById('download-btn').classList.add('d-none');
+
+        try {
+          let url = `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}`;
+          if (date) url += `&date=${encodeURIComponent(date)}`;
+
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`NASA API error: ${res.status}`);
+          const data = await res.json();
+
+          document.getElementById('wrapper-title').textContent = data.title || '';
+          document.getElementById('wrapper-copywrite').textContent = data.copyright || 'NASA';
+          document.getElementById('wrapper-explanation').textContent = data.explanation || '';
+
+          if (data.media_type === 'video') {
+            let videoUrl = data.url || '';
+            if (videoUrl.includes('watch?v=')) videoUrl = videoUrl.replace('watch?v=', 'embed/');
+            container.innerHTML = `
+              <div class="ratio ratio-16x9">
+                <iframe src="${escapeHtml(videoUrl)}" title="NASA APOD Video" frameborder="0" allowfullscreen></iframe>
+              </div>`;
+          } else {
+            const hd = data.hdurl || data.url || '';
+            container.innerHTML = `
+              <div class="bg-image hover-overlay ripple-1-strong rounded">
+                <img src="${escapeHtml(hd)}" class="w-100" alt="${escapeHtml(data.title)}" />
+                <a href="${escapeHtml(hd)}" target="_blank" rel="noopener noreferrer">
+                  <div class="mask" style="background-color: rgba(251,251,251,0.2)"></div>
+                </a>
+              </div>`;
+            const dlBtn = document.getElementById('download-btn');
+            dlBtn.classList.remove('d-none');
+            dlBtn.onclick = () => { window.open(hd, '_blank'); };
+          }
+        } catch (err) {
+          container.innerHTML = `<div class="alert alert-danger">Error: ${escapeHtml(err.message)}</div>`;
+          console.error(err);
+        }
+      }
+
+      async function fetchRandomAPOD() {
+        const container = document.getElementById('wrapper-media');
+        container.innerHTML = '<div class="loading-text">Fetching random image…</div>';
+        try {
+          const url = `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&count=1`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('Random fetch failed');
+          const data = await res.json();
+          if (data.length) fetchAPOD(data[0].date);
+        } catch (err) {
+          container.innerHTML = `<div class="alert alert-danger">Error: ${escapeHtml(err.message)}</div>`;
+        }
+      }
+
+      fetchAPOD(); // load today's APOD
+    </script>
+  </body>
+</html>
