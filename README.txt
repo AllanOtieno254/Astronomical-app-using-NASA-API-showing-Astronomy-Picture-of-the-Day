@@ -2,30 +2,16 @@
 
 ![NASA APOD Banner](./img/banner.png)
 
-## Table of Contents
-
-1. [Project Overview](#project-overview)  
-2. [Live Demo](#live-demo)  
-3. [Features](#features)  
-4. [Technologies Used](#technologies-used)  
-5. [How It Works](#how-it-works)  
-6. [Installation & Setup](#installation--setup)  
-7. [Usage](#usage)  
-8. [Screenshots](#screenshots)  
-9. [API Reference](#api-reference)  
-10. [Contributing](#contributing)  
-11. [License](#license)  
-12. [Acknowledgements](#acknowledgements)
-
 ---
 
 ## Project Overview
 
-The **Astronomical App using NASA API** is a modern web application that allows users to explore the **Astronomy Picture of the Day (APOD)** provided by NASA. The app fetches daily space images or videos, along with descriptions and copyright information, allowing users to immerse themselves in the wonders of the universe.  
+The **Astronomical App using NASA API** is a modern web application that allows users to explore the **Astronomy Picture of the Day (APOD)** provided by NASA. The app fetches daily space images or videos, along with descriptions and copyright information, allowing users to immerse themselves in the wonders of the universe.
 
 This project is ideal for astronomy enthusiasts, students, educators, and anyone passionate about exploring space.
 
-Key objectives of the project:  
+### Key Objectives
+
 - Display NASA’s APOD dynamically.  
 - Allow users to select a specific date to view images/videos.  
 - Provide a **random APOD feature** to explore interesting astronomical content.  
@@ -42,6 +28,8 @@ You can try the live version of this project here:
 ---
 
 ## Features
+
+### Core Features
 
 - **Daily APOD Fetching:** Loads the Astronomy Picture of the Day automatically.  
 - **Date Picker:** Users can select any date and view the APOD of that day.  
@@ -83,13 +71,3 @@ To run this project locally:
    ```bash
    git clone https://github.com/YourUsername/Astronomical-app-using-NASA-API-showing-Astronomy-Picture-of-the-Day.git
    cd Astronomical-app-using-NASA-API-showing-Astronomy-Picture-of-the-Day
-
-
-MDB5
-Version: FREE 9.2.0
-
-Documentation:
-https://mdbootstrap.com/docs/standard/
-
-Contact:
-contact@mdbootstrap.com
