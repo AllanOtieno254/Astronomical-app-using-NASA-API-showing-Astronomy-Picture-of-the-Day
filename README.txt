@@ -1,4 +1,4 @@
-# Astronomical App using NASA API – Astronomy Picture of the Day (APOD)
+#Astronomical App using NASA API – Astronomy Picture of the Day (APOD)
 
 ![NASA APOD Banner](./img/banner.png)
 
