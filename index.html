@@ -97,10 +97,10 @@
 
   <script>
     // ---------- CONFIG ----------
-    const NASA_API_KEY = "apIjpe3XDA1VOqgQ0KC2RTYmqz6T1pb0knrDaLay"; 
+    const NASA_API_KEY = "DEMO_KEY"; // ⚠️ Replace with your real NASA key
     // ----------------------------
 
-    // DOM
+    // DOM Elements
     const dateInput = document.getElementById('dateInput');
     const fetchBtn = document.getElementById('fetchBtn');
     const randomBtn = document.getElementById('randomBtn');
@@ -157,13 +157,10 @@
         window._lastAPOD = data;
       } catch (err) {
         console.warn("APOD fetch error:", err.message);
-
-        // Fallback ONLY for today
         if (isToday) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
-          const yDate = yesterday.toISOString().slice(0, 10);
-          fetchAPOD(yDate, false);
+          fetchAPOD(yesterday.toISOString().slice(0,10), false);
         } else {
           showError(`No APOD available for ${date}. Please try another date.`);
         }
@@ -242,7 +239,7 @@
     stopSpeakBtn.addEventListener('click', stopSpeaking);
 
     // Initial setup
-    //ddw
+    // Fetch today's APOD
     (function init() {
       dateInput.value = todayISO;
     })();
