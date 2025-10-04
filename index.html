@@ -52,7 +52,6 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 16px;
         padding: 30px;
-        
         box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 2px 8px rgba(255,255,255,0.1);
         transition: transform 0.3s ease;
       }
@@ -118,6 +117,9 @@
               <h5 id="wrapper-title"></h5>
               <p class="mb-2 text-muted">Copyright <span id="wrapper-copywrite"></span></p>
               <p class="mb-2" id="wrapper-explanation"></p>
+              <!-- 🎤 Voice Narration Buttons -->
+              <button class="btn btn-info btn-sm mt-2" id="speak-btn"><i class="fa fa-volume-up"></i> Listen</button>
+              <button class="btn btn-danger btn-sm mt-2" id="stop-btn"><i class="fa fa-stop"></i> Stop</button>
             </div>
           </div>
         </div>
@@ -167,22 +169,23 @@
           if (!res.ok) throw new Error(`NASA API error: ${res.status}`);
           const data = await res.json();
 
-          document.getElementById('wrapper-title').textContent = data.title || '';
-          document.getElementById('wrapper-copywrite').textContent = data.copyright || 'NASA';
-          document.getElementById('wrapper-explanation').textContent = data.explanation || '';
+          const title = (data.title && data.title.trim()) ? data.title.trim() : "Astronomy Picture of the Day";
+          document.getElementById('wrapper-title').innerText = title;
+          document.getElementById('wrapper-copywrite').innerText = data.copyright || 'NASA';
+          document.getElementById('wrapper-explanation').innerText = data.explanation || '';
 
           if (data.media_type === 'video') {
             let videoUrl = data.url || '';
             if (videoUrl.includes('watch?v=')) videoUrl = videoUrl.replace('watch?v=', 'embed/');
             container.innerHTML = `
               <div class="ratio ratio-16x9">
-                <iframe src="${escapeHtml(videoUrl)}" title="NASA APOD Video" frameborder="0" allowfullscreen></iframe>
+                <iframe src="${escapeHtml(videoUrl)}" title="${escapeHtml(title)}" frameborder="0" allowfullscreen></iframe>
               </div>`;
           } else {
             const hd = data.hdurl || data.url || '';
             container.innerHTML = `
               <div class="bg-image hover-overlay ripple-1-strong rounded">
-                <img src="${escapeHtml(hd)}" class="w-100" alt="${escapeHtml(data.title)}" />
+                <img src="${escapeHtml(hd)}" class="w-100" alt="${escapeHtml(title)}" />
                 <a href="${escapeHtml(hd)}" target="_blank" rel="noopener noreferrer">
                   <div class="mask" style="background-color: rgba(251,251,251,0.2)"></div>
                 </a>
@@ -210,6 +213,24 @@
           container.innerHTML = `<div class="alert alert-danger">Error: ${escapeHtml(err.message)}</div>`;
         }
       }
+
+      // 🎤 Text-to-Speech (Voice Narration)
+      const speakBtn = document.getElementById("speak-btn");
+      const stopBtn = document.getElementById("stop-btn");
+
+      speakBtn.addEventListener("click", () => {
+        const text = document.getElementById("wrapper-explanation").innerText;
+        if (text) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = "en-US";
+          speechSynthesis.cancel(); // stop any previous narration
+          speechSynthesis.speak(utterance);
+        }
+      });
+
+      stopBtn.addEventListener("click", () => {
+        speechSynthesis.cancel();
+      });
 
       fetchAPOD(); // load today's APOD
     </script>

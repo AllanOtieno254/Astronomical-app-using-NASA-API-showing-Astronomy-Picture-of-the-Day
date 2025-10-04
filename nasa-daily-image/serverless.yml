@@ -1,0 +1,28 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: allanotieno254
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: nasa-daily-image
+app: nasa-daily-image
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  lambdaHashingVersion: 20201221
+  # Uncomment to easily set up a custom domain. Read the docs for more details:
+  # https://www.serverless.com/framework/docs/providers/aws/guide/domains
+  # domain: api.example.com
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - schedule: cron(0 4 * * ? *) # Every day at 7 AM Kenya time (04:00 UTC)
+    environment:
+      NASA_API_KEY: apIjpe3XDA1VOqgQ0KC2RTYmqz6T1pb0knrDaLay
+      TWILIO_ACCOUNT_SID: AC97bf4006494e3fd7ba3438045f98a95b
+      TWILIO_AUTH_TOKEN: 67dfdf1ca28865c8df4decae58ed8e38
+      TWILIO_PHONE_NUMBER: 13509305429
+      MY_PHONE_NUMBER: +254740782619
+      # httpApi:
+      #   path: /
+      #   method: get
