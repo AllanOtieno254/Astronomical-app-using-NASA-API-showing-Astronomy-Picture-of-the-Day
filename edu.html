@@ -8,6 +8,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="img/mdb-favicon.ico" />
   <style>
+    #bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.6; /* Dim slightly for readability */
+}
+
+
+
+
     .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
     .option { transition: all .18s ease; }
     .option:hover { transform: translateY(-3px); }
@@ -36,6 +50,11 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6">
+    <!-- background video  -->
+     <video autoplay muted loop id="bg-video">
+  <source src="./img/istockphoto-1270215944-640_adpp_is.mp4" type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
     <!-- Left: APOD media & details -->
     <section class="glass rounded-xl p-6 md:col-span-2">
       <div class="flex items-start gap-6">
@@ -481,8 +500,4 @@
     })();
   </script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> 615110d1272e0b185e8a7d9734490588d2b3ad74
