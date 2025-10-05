@@ -1,3 +1,5 @@
+index.html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +10,7 @@
   <!-- Tailwind CDN for quick styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="img/mdb-favicon.ico" />
+  <link rel="stylesheet" href="/css/mobile.css">
 
   <style>
     #bg-video {
@@ -50,7 +53,7 @@
 
     <section class="grid md:grid-cols-3 gap-6 items-start">
       <!-- Controls -->
-      <div class="glass rounded-xl p-6 md:col-span-1">
+      <div class="glass  rounded-xl p-6 md:col-span-1">
         <label for="dateInput" class="block text-sm text-slate-300 mb-2">Pick a date (YYYY-MM-DD)</label>
         <input id="dateInput" type="date" class="w-full rounded-md p-2 bg-transparent border border-slate-700 text-slate-100" max="" />
 
@@ -91,14 +94,13 @@
 
   <footer class="mt-auto py-8">
     <div class="max-w-6xl mx-auto px-4 text-slate-500 text-sm">
-      © SpaceScholar — demo. Replace <code>NASA_API_KEY</code> in the source with your own key.
+      © SpaceScholar — demo. 
     </div>
   </footer>
 
   <script>
     // ---------- CONFIG ----------
-    const NASA_API_KEY = "KsHi59MzcNF0ahRnjGEQAxcQP92yfGQJdpchdTC4";
-    const MAX_BACKTRACK_DAYS = 7; // how many days to look back if APOD missing
+    const NASA_API_KEY = "KsHi59MzcNF0ahRnjGEQAxcQP92yfGQJdpchdTC4"; // ⚠️ Replace with your real NASA key
     // ----------------------------
 
     // DOM Elements
@@ -116,7 +118,7 @@
     const explanationPreview = document.getElementById('explanationPreview');
     const mediaWrapper = document.getElementById('mediaWrapper');
 
-    const todayISO = new Date().toISOString().slice(0, 10);
+    const todayISO = new Date().toISOString().slice(0,10);
     dateInput.max = todayISO;
 
     function showLoading(text = 'Loading…') {
@@ -132,8 +134,8 @@
     }
 
     // ---- Fetch APOD ----
-    async function fetchAPOD(date, attempts = 0) {
-      showLoading(`Fetching APOD for ${date}...`);
+    async function fetchAPOD(date, isToday = false) {
+      showLoading('Fetching APOD…');
       try {
         let url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`;
         if (date) url += `&date=${date}`;
@@ -142,16 +144,13 @@
         if (!res.ok) throw new Error("No APOD found for this date.");
         const data = await res.json();
 
-        // If API response is empty or invalid, trigger fallback
-        if (!data || !data.url) throw new Error("Empty APOD response.");
-
         // Show APOD
         titlePreview.textContent = data.title || 'APOD';
         datePreview.textContent = data.date ? new Date(data.date).toLocaleDateString() : '';
         explanationPreview.textContent = data.explanation || '';
 
         if (data.media_type === 'video') {
-          const src = data.url.includes('watch?v=') ? data.url.replace('watch?v=', 'embed/') : data.url;
+          let src = data.url.includes('watch?v=') ? data.url.replace('watch?v=', 'embed/') : data.url;
           mediaWrapper.innerHTML = `<iframe src="${src}" class="w-full h-full rounded-lg" frameborder="0" allowfullscreen></iframe>`;
         } else {
           const imgSrc = data.hdurl || data.url || '';
@@ -160,17 +159,13 @@
 
         window._lastAPOD = data;
       } catch (err) {
-        console.warn(`APOD fetch failed for ${date}:`, err.message);
-
-        // Try previous day if not found and limit attempts
-        if (attempts < MAX_BACKTRACK_DAYS) {
-          const prevDate = new Date(date);
-          prevDate.setDate(prevDate.getDate() - 1);
-          const newDate = prevDate.toISOString().slice(0, 10);
-          showLoading(`No APOD for ${date}, retrying ${newDate}...`);
-          fetchAPOD(newDate, attempts + 1);
+        console.warn("APOD fetch error:", err.message);
+        if (isToday) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          fetchAPOD(yesterday.toISOString().slice(0,10), false);
         } else {
-          showError(`No APOD available in the last ${MAX_BACKTRACK_DAYS} days. NASA might not have uploaded recent images yet.`);
+          showError(`No APOD available for ${date}. Please try another date.`);
         }
       }
     }
@@ -190,7 +185,9 @@
     }
 
     function stopSpeaking() {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     }
 
     // Events
@@ -202,7 +199,7 @@
 
     todayBtn.addEventListener('click', () => {
       dateInput.value = todayISO;
-      fetchAPOD(todayISO);
+      fetchAPOD(todayISO, true);
     });
 
     randomBtn.addEventListener('click', async () => {
@@ -244,10 +241,10 @@
 
     stopSpeakBtn.addEventListener('click', stopSpeaking);
 
-    // Initialize
+    // Initial setup
+    // Fetch today's APOD
     (function init() {
       dateInput.value = todayISO;
-      fetchAPOD(todayISO);
     })();
   </script>
 </body>
