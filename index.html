@@ -50,7 +50,7 @@
 
     <section class="grid md:grid-cols-3 gap-6 items-start">
       <!-- Controls -->
-      <div class="glass  rounded-xl p-6 md:col-span-1">
+      <div class="glass rounded-xl p-6 md:col-span-1">
         <label for="dateInput" class="block text-sm text-slate-300 mb-2">Pick a date (YYYY-MM-DD)</label>
         <input id="dateInput" type="date" class="w-full rounded-md p-2 bg-transparent border border-slate-700 text-slate-100" max="" />
 
@@ -97,7 +97,8 @@
 
   <script>
     // ---------- CONFIG ----------
-    const NASA_API_KEY = "DEMO_KEY"; // ⚠️ Replace with your real NASA key
+    const NASA_API_KEY = "KsHi59MzcNF0ahRnjGEQAxcQP92yfGQJdpchdTC4";
+    const MAX_BACKTRACK_DAYS = 7; // how many days to look back if APOD missing
     // ----------------------------
 
     // DOM Elements
@@ -115,7 +116,7 @@
     const explanationPreview = document.getElementById('explanationPreview');
     const mediaWrapper = document.getElementById('mediaWrapper');
 
-    const todayISO = new Date().toISOString().slice(0,10);
+    const todayISO = new Date().toISOString().slice(0, 10);
     dateInput.max = todayISO;
 
     function showLoading(text = 'Loading…') {
@@ -131,8 +132,8 @@
     }
 
     // ---- Fetch APOD ----
-    async function fetchAPOD(date, isToday = false) {
-      showLoading('Fetching APOD…');
+    async function fetchAPOD(date, attempts = 0) {
+      showLoading(`Fetching APOD for ${date}...`);
       try {
         let url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}`;
         if (date) url += `&date=${date}`;
@@ -141,13 +142,16 @@
         if (!res.ok) throw new Error("No APOD found for this date.");
         const data = await res.json();
 
+        // If API response is empty or invalid, trigger fallback
+        if (!data || !data.url) throw new Error("Empty APOD response.");
+
         // Show APOD
         titlePreview.textContent = data.title || 'APOD';
         datePreview.textContent = data.date ? new Date(data.date).toLocaleDateString() : '';
         explanationPreview.textContent = data.explanation || '';
 
         if (data.media_type === 'video') {
-          let src = data.url.includes('watch?v=') ? data.url.replace('watch?v=', 'embed/') : data.url;
+          const src = data.url.includes('watch?v=') ? data.url.replace('watch?v=', 'embed/') : data.url;
           mediaWrapper.innerHTML = `<iframe src="${src}" class="w-full h-full rounded-lg" frameborder="0" allowfullscreen></iframe>`;
         } else {
           const imgSrc = data.hdurl || data.url || '';
@@ -156,13 +160,17 @@
 
         window._lastAPOD = data;
       } catch (err) {
-        console.warn("APOD fetch error:", err.message);
-        if (isToday) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          fetchAPOD(yesterday.toISOString().slice(0,10), false);
+        console.warn(`APOD fetch failed for ${date}:`, err.message);
+
+        // Try previous day if not found and limit attempts
+        if (attempts < MAX_BACKTRACK_DAYS) {
+          const prevDate = new Date(date);
+          prevDate.setDate(prevDate.getDate() - 1);
+          const newDate = prevDate.toISOString().slice(0, 10);
+          showLoading(`No APOD for ${date}, retrying ${newDate}...`);
+          fetchAPOD(newDate, attempts + 1);
         } else {
-          showError(`No APOD available for ${date}. Please try another date.`);
+          showError(`No APOD available in the last ${MAX_BACKTRACK_DAYS} days. NASA might not have uploaded recent images yet.`);
         }
       }
     }
@@ -182,9 +190,7 @@
     }
 
     function stopSpeaking() {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     }
 
     // Events
@@ -196,7 +202,7 @@
 
     todayBtn.addEventListener('click', () => {
       dateInput.value = todayISO;
-      fetchAPOD(todayISO, true);
+      fetchAPOD(todayISO);
     });
 
     randomBtn.addEventListener('click', async () => {
@@ -238,10 +244,10 @@
 
     stopSpeakBtn.addEventListener('click', stopSpeaking);
 
-    // Initial setup
-    // Fetch today's APOD
+    // Initialize
     (function init() {
       dateInput.value = todayISO;
+      fetchAPOD(todayISO);
     })();
   </script>
 </body>
