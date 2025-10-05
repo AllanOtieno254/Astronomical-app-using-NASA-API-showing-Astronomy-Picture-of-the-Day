@@ -7,73 +7,147 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="img/mdb-favicon.ico" />
-
+  <link rel="stylesheet" href="/css/mobile.css">
   <style>
     #bg-video {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: -1;
-      opacity: 0.6;
-    }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.6; /* Dim slightly for readability */
+}
 
-    /* Chatbot styles */
-    #chatbot-icon {
-      position: fixed;
-      bottom: 30px; right: 30px;
-      width: 70px; height: 70px;
-      background-color: #0b3d91;
-      color: white;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 30px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-    #chatbot-icon:hover { background-color: #1f5fe0; transform: scale(1.1); }
+/* Floating Chatbot Icon */
+      #chatbot-icon {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 70px;
+        height: 70px;
+        background-color: #0b3d91;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
 
-    #chatbot-container {
-      display: none;
-      flex-direction: column;
-      position: fixed;
-      bottom: 110px; right: 30px;
-      width: 350px; height: 450px;
-      background-color: #16213e;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-      overflow: hidden;
-      z-index: 999;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+      #chatbot-icon:hover {
+        background-color: #1f5fe0;
+        transform: scale(1.1);
+      }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
+      /* Chatbot Container */
+      #chatbot-container {
+        display: none;
+        flex-direction: column;
+        position: fixed;
+        bottom: 110px;
+        right: 30px;
+        width: 350px;
+        height: 450px;
+        background-color: #16213e;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+        z-index: 999;
+        animation: fadeIn 0.3s ease-in-out;
+      }
 
-    #chatbot-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .bot, .user { max-width: 80%; padding: 10px 14px; border-radius: 20px; animation: bubble 0.3s ease-in-out; }
-    .bot { background-color: #0b3d91; align-self: flex-start; color: #fff; }
-    .user { background-color: #45a29e; align-self: flex-end; color: #fff; }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
 
-    @keyframes bubble { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+      #chatbot-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
 
-    #chatbot-input-container { display: flex; padding: 10px; border-top: 1px solid #0b3d91; background-color: #1f2833; }
-    #chatbot-input { flex: 1; padding: 10px; border: none; border-radius: 20px; background-color: #0b0c10; color: #fff; outline: none; }
-    #chatbot-send { background-color: #0b3d91; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 8px; cursor: pointer; color: white; }
+      .bot,
+      .user {
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 20px;
+        animation: bubble 0.3s ease-in-out;
+      }
+
+      .bot {
+        background-color: #0b3d91;
+        align-self: flex-start;
+      }
+
+      .user {
+        background-color: #45a29e;
+        align-self: flex-end;
+      }
+
+      @keyframes bubble {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #chatbot-input-container {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #0b3d91;
+        background-color: #1f2833;
+      }
+
+      #chatbot-input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 20px;
+        outline: none;
+        background-color: #0b0c10;
+        color: #fff;
+      }
+
+      #chatbot-send {
+        background-color: #0b3d91;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-left: 8px;
+        cursor: pointer;
+        color: white;
+      }
+
+      
 
     .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
     .option { transition: all .18s ease; }
     .option:hover { transform: translateY(-3px); }
   </style>
 </head>
-
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
-  <!-- HEADER -->
   <header class="py-6">
     <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -95,12 +169,12 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6">
-    <video autoplay muted loop id="bg-video">
-      <source src="./img/istockphoto-1270215944-640_adpp_is.mp4" type="video/mp4">
-      Your browser does not support HTML5 video.
-    </video>
-
-    <!-- Left: APOD -->
+    <!-- background video  -->
+     <video autoplay muted loop id="bg-video">
+  <source src="./img/istockphoto-1450580850-640_adpp_is.mp4" type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
+    <!-- Left: APOD media & details -->
     <section class="glass rounded-xl p-6 md:col-span-2">
       <div class="flex items-start gap-6">
         <div class="flex-1">
@@ -117,134 +191,675 @@
             <button id="viewWikiBtn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700">Contextual Wiki</button>
           </div>
         </div>
+
+        <aside class="w-64">
+          <div class="glass rounded-lg p-4">
+            <h4 class="text-sm text-slate-300">Lesson Notes</h4>
+            <textarea id="lessonNotes" rows="8" class="mt-2 w-full rounded-md p-2 bg-slate-800 text-slate-100 text-sm" placeholder="Add teacher notes here..."></textarea>
+            <div class="mt-3 flex gap-2">
+              <button id="saveNotesBtn" class="flex-1 px-3 py-2 bg-emerald-500 rounded-md text-slate-900">Save Notes</button>
+              <button id="clearNotesBtn" class="px-3 py-2 border border-slate-700 rounded-md">Clear</button>
+            </div>
+            <div class="mt-3 text-xs text-slate-400">Saved lessons stored locally in your browser.</div>
+          </div>
+        </aside>
       </div>
+
+      <!-- Wikipedia results -->
       <div id="wikiResults" class="mt-6 glass rounded-lg p-4 hidden"></div>
     </section>
 
-    <!-- Right: Quiz -->
+    <!-- Right: Quiz panel -->
     <aside class="glass rounded-xl p-6">
-      <h3 class="text-lg font-semibold">Quiz</h3>
-      <div class="mt-3">
-        <div class="flex justify-between items-center">
-          <div class="text-sm text-slate-400">Question <span id="qIndex">0</span>/<span id="qTotal">0</span></div>
-          <div class="text-sm text-emerald-400">Score: <span id="score">0</span></div>
+      <div>
+        <h3 class="text-lg font-semibold">Quiz</h3>
+        <div class="mt-3">
+          <div class="flex justify-between items-center">
+            <div class="text-sm text-slate-400">Question <span id="qIndex">0</span>/<span id="qTotal">0</span></div>
+            <div class="text-sm text-emerald-400">Score: <span id="score">0</span></div>
+          </div>
+          <h4 id="questionText" class="mt-4 text-white font-medium"></h4>
+
+          <div id="options" class="mt-4 grid gap-3">
+            <!-- Option buttons inserted here -->
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <button id="prevQ" class="px-3 py-2 rounded-md border">Previous</button>
+            <button id="nextQ" class="px-3 py-2 rounded-md border ml-auto">Next</button>
+            <button id="endQuiz" class="px-3 py-2 rounded-md bg-rose-600 text-white">End & Results</button>
+          </div>
+
+          <div id="quizResult" class="mt-4 hidden p-3 rounded-md bg-slate-800"></div>
         </div>
-        <h4 id="questionText" class="mt-4 text-white font-medium"></h4>
-        <div id="options" class="mt-4 grid gap-3"></div>
-        <div class="mt-4 flex gap-2">
-          <button id="prevQ" class="px-3 py-2 rounded-md border">Previous</button>
-          <button id="nextQ" class="px-3 py-2 rounded-md border ml-auto">Next</button>
-          <button id="endQuiz" class="px-3 py-2 rounded-md bg-rose-600 text-white">End & Results</button>
-        </div>
-        <div id="quizResult" class="mt-4 hidden p-3 rounded-md bg-slate-800"></div>
       </div>
     </aside>
   </main>
 
-  <!-- CHATBOT -->
-  <div id="chatbot-icon">💬</div>
-  <div id="chatbot-container">
-    <div id="chatbot-messages"></div>
-    <div id="chatbot-input-container">
-      <input type="text" id="chatbot-input" placeholder="Ask about space..." />
-      <button id="chatbot-send">➤</button>
+  <!-- Floating Chatbot -->
+    <div id="chatbot-icon">💬</div>
+
+    <div id="chatbot-container">
+      <div id="chatbot-messages"></div>
+      <div id="chatbot-input-container">
+        <input type="text" id="chatbot-input" placeholder="Ask about space..." />
+        <button id="chatbot-send">➤</button>
+      </div>
     </div>
-  </div>
+
 
   <footer class="py-8 text-center text-slate-500">
-    © SpaceScholar Learning
+    © SpaceScholar Learning 
   </footer>
 
   <script>
-    // NASA API fetch
-    const NASA_API_KEY = "apIjpe3XDA1VOqgQ0KC2RTYmqz6T1pb0knrDaLay"; // Replace with actual key safely
-    let APOD = null;
+    // ---------- CONFIG ----------
+    const NASA_API_KEY = "apIjpe3XDA1VOqgQ0KC2RTYmqz6T1pb0knrDaLay"; // <-- Replace with your key
+    // For translations: if you have a Google Translate API key you could wire it here.
+    const TRANSLATE_API_KEY = ""; // optional, leave empty to use fallback links
+    // ----------------------------
 
-    async function fetchAPOD(date = "") {
+    // Helpers
+    function qs(sel) { return document.querySelector(sel); }
+    function qsa(sel) { return Array.from(document.querySelectorAll(sel)); }
+    function getQueryParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+    function safeText(s) { return (s || '').toString(); }
+
+    // DOM refs
+    const apodTitle = qs('#apodTitle');
+    const apodDate = qs('#apodDate');
+    const mediaContainer = qs('#mediaContainer');
+    const apodExplanation = qs('#apodExplanation');
+    const toYoutubeBtn = qs('#toYoutubeBtn');
+    const generateQuizBtn = qs('#generateQuizBtn');
+    const lessonNotes = qs('#lessonNotes');
+    const saveNotesBtn = qs('#saveNotesBtn');
+    const clearNotesBtn = qs('#clearNotesBtn');
+    const saveLessonBtn = qs('#saveLessonBtn');
+    const viewWikiBtn = qs('#viewWikiBtn');
+
+    // Quiz elements
+    const qIndexEl = qs('#qIndex');
+    const qTotalEl = qs('#qTotal');
+    const questionText = qs('#questionText');
+    const optionsEl = qs('#options');
+    const prevQ = qs('#prevQ');
+    const nextQ = qs('#nextQ');
+    const endQuiz = qs('#endQuiz');
+    const scoreEl = qs('#score');
+    const quizResult = qs('#quizResult');
+    const wikiResults = qs('#wikiResults');
+    const langSelect = qs('#langSelect');
+
+    // State
+    let APOD = null;
+    let QUIZ = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answers = {}; // idx -> chosen option index
+
+    // ---------- APOD fetch ----------
+    async function fetchAPOD(date) {
       try {
-        const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}${date ? `&date=${date}` : ""}`;
+        mediaContainer.innerHTML = '<div class="text-slate-400">Loading APOD…</div>';
+        const url = `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(NASA_API_KEY)}${date ? '&date=' + encodeURIComponent(date) : ''}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`NASA API ${res.status}`);
         const data = await res.json();
         APOD = data;
         renderAPOD(data);
       } catch (err) {
-        document.querySelector("#mediaContainer").innerHTML =
-          `<div class='text-rose-400'>Error: ${err.message}</div>`;
+        console.error(err);
+        mediaContainer.innerHTML = `<div class="text-rose-400">Error fetching APOD: ${err.message}</div>`;
       }
     }
 
     function renderAPOD(data) {
-      document.querySelector("#apodTitle").textContent = data.title || "APOD";
-      document.querySelector("#apodDate").textContent = data.date;
-      document.querySelector("#apodExplanation").textContent = data.explanation;
+      apodTitle.textContent = data.title || 'APOD';
+      apodDate.textContent = data.date ? new Date(data.date).toLocaleString() : '';
+      apodExplanation.textContent = data.explanation || '';
 
-      const media = document.querySelector("#mediaContainer");
-      if (data.media_type === "video") {
-        const src = data.url.includes("watch?v=")
-          ? data.url.replace("watch?v=", "embed/")
-          : data.url;
-        media.innerHTML = `<iframe src="${src}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>`;
+      if (data.media_type === 'video') {
+        let src = data.url;
+        if (src.includes('watch?v=')) src = src.replace('watch?v=', 'embed/');
+        mediaContainer.innerHTML = `<iframe src="${src}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>`;
       } else {
-        media.innerHTML = `<img src="${data.url}" alt="${data.title}" class="w-full h-full object-cover"/>`;
+        const img = data.hdurl || data.url || '';
+        mediaContainer.innerHTML = `<img src="${img}" alt="${data.title}" class="w-full h-full object-cover" />`;
       }
     }
 
-    fetchAPOD(); // auto-load today
+    // ---------- Quiz generation (simple keyword + templates) ----------
+    // Very lightweight: extract keywords and build questions. You can replace with an AI-based generator later.
+    function extractKeywords(text, count = 6) {
+      if (!text) return [];
+      const stop = new Set(['which','that','have','with','this','from','were','their','they','them','been','into','about','over','under','around','and','the','for','are','was','is','on','a','an','of','in','to','by','as','at','it']);
+      const words = text
+        .replace(/[^\w\s]/g,' ')
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(w => w.length > 4 && !stop.has(w));
+      const freq = {};
+      words.forEach(w => freq[w] = (freq[w]||0) + 1);
+      return Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0, count);
+    }
 
-    // Chatbot logic
-    document.addEventListener("DOMContentLoaded", () => {
-      const icon = document.getElementById("chatbot-icon");
-      const container = document.getElementById("chatbot-container");
-      const input = document.getElementById("chatbot-input");
-      const send = document.getElementById("chatbot-send");
-      const messages = document.getElementById("chatbot-messages");
+    function shuffle(arr) {
+      for (let i = arr.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
 
-      icon.addEventListener("click", () => {
-        container.style.display = container.style.display === "flex" ? "none" : "flex";
+    function buildQuizFromAPOD(apod) {
+      const text = `${apod.title || ''} ${apod.explanation || ''}`;
+      const kws = extractKeywords(text, 8);
+      // fallback
+      if (kws.length === 0) kws.push((apod.title || 'space').split(' ')[0]);
+
+      const quiz = [];
+      // create up to 5 questions
+      for (let i = 0; i < Math.min(5, kws.length); i++) {
+        const word = kws[i];
+        // question types: MCQ (definition-style) or True/False
+        if (i % 2 === 0) {
+          // MCQ: "What term is related to X?" with distractors from other keywords or common terms
+          const correct = capitalize(word);
+          const distractors = ['Nebula', 'Galaxy', 'Comet', 'Planet', 'Star', 'Orbit', 'Meteor', 'Atmosphere'].filter(d => d.toLowerCase() !== word.toLowerCase());
+          // pull two distractors from other keywords if present
+          const otherKw = kws.filter(k=>k!==word).slice(0,2).map(k => capitalize(k));
+          const choices = [correct, ...otherKw, distractors[Math.floor(Math.random()*distractors.length)]].slice(0,4);
+          shuffle(choices);
+          quiz.push({
+            q: `Which of the following best matches the keyword "${word}" from the APOD?`,
+            options: choices,
+            a: correct,
+            type: 'mcq'
+          });
+        } else {
+          // True/False: statement about the keyword (simple template)
+          const stmt = `The APOD discussion mentions "${word}".`;
+          const tf = Math.random() > 0.1; // likely true because keyword came from text
+          quiz.push({
+            q: stmt,
+            options: ['True', 'False'],
+            a: tf ? 'True' : 'False',
+            type: 'tf'
+          });
+        }
+      }
+
+      return quiz;
+    }
+
+    function capitalize(s) {
+      if (!s) return s;
+      return s[0].toUpperCase() + s.slice(1);
+    }
+
+    // ---------- Quiz render / interaction ----------
+    function loadQuiz(quiz) {
+      QUIZ = quiz;
+      currentIndex = 0;
+      score = 0;
+      answers = {};
+      qTotalEl.textContent = QUIZ.length;
+      updateQuizUI();
+    }
+
+    function updateQuizUI() {
+      if (!QUIZ || QUIZ.length === 0) {
+        qIndexEl.textContent = 0;
+        questionText.textContent = 'No quiz available. Click "Regenerate Quiz".';
+        optionsEl.innerHTML = '';
+        qTotalEl.textContent = 0;
+        return;
+      }
+      qIndexEl.textContent = currentIndex + 1;
+      qTotalEl.textContent = QUIZ.length;
+      const item = QUIZ[currentIndex];
+      questionText.textContent = item.q;
+
+      // build options
+      optionsEl.innerHTML = '';
+      item.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option text-left p-3 rounded-md bg-slate-800 border border-slate-700';
+        btn.textContent = opt;
+        btn.onclick = () => handleAnswer(idx);
+        // highlight if already answered
+        if (answers[currentIndex] === idx) {
+          btn.classList.add('ring-2', 'ring-emerald-400');
+        }
+        optionsEl.appendChild(btn);
       });
 
-      send.addEventListener("click", handleMessage);
-      input.addEventListener("keypress", (e) => { if (e.key === "Enter") handleMessage(); });
+      // update score display
+      scoreEl.textContent = score;
+      quizResult.classList.add('hidden');
+    }
 
-      function appendMessage(sender, text) {
-        const div = document.createElement("div");
-        div.className = sender;
-        div.textContent = text;
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
+    function handleAnswer(optionIdx) {
+      const item = QUIZ[currentIndex];
+      const chosen = item.options[optionIdx];
+      // if already answered, ignore re-scoring (but allow changing answer)
+      const prev = answers[currentIndex];
+      if (prev !== undefined) {
+        // if previously correct and now changing, adjust score
+        if (QUIZ[currentIndex].options[prev] === QUIZ[currentIndex].a) score--;
       }
 
-      async function handleMessage() {
-        const userText = input.value.trim();
-        if (!userText) return;
-        appendMessage("user", userText);
-        input.value = "";
-
-        appendMessage("bot", "⋯");
-        let response = await queryGemini(userText);
-        messages.lastChild.remove();
-        appendMessage("bot", response);
+      answers[currentIndex] = optionIdx;
+      if (chosen === item.a) {
+        // if newly correct, increase
+        if (prev === undefined || QUIZ[currentIndex].options[prev] !== QUIZ[currentIndex].a) score++;
       }
+      scoreEl.textContent = score;
 
-      async function queryGemini(prompt) {
-        const GEMINI_KEY = "AIzaSyAA0mTqF8IvW_jUp7WOsJ_fP6xtg9Xgir8";
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_KEY}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
-            }),
-          });
-          const data = await res.json();
-          return data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm not sure about that.";
-        } catch {
-          return "Network issue. Try again.";
+      // visual feedback
+      updateQuizUI();
+    }
+
+    prevQ.addEventListener('click', () => {
+      if (currentIndex > 0) currentIndex--;
+      updateQuizUI();
+    });
+    nextQ.addEventListener('click', () => {
+      if (currentIndex < QUIZ.length - 1) currentIndex++;
+      updateQuizUI();
+    });
+    endQuiz.addEventListener('click', () => {
+      showResult();
+    });
+
+    function showResult() {
+      quizResult.classList.remove('hidden');
+      quizResult.innerHTML = `<div class="text-white font-semibold">Final Score: ${score} / ${QUIZ.length}</div>`;
+      // show review
+      const review = document.createElement('div');
+      review.className = 'mt-3 text-sm text-slate-300';
+      let html = '<ol class="list-decimal ml-5">';
+      QUIZ.forEach((q, idx) => {
+        const chosenIdx = answers[idx];
+        const chosen = chosenIdx === undefined ? '<em>Not answered</em>' : q.options[chosenIdx];
+        html += `<li class="mt-2"><strong>${q.q}</strong><div>Correct: <span class="text-emerald-400">${q.a}</span></div><div>Your answer: ${chosen}</div></li>`;
+      });
+      html += '</ol>';
+      review.innerHTML = html;
+      quizResult.appendChild(review);
+    }
+
+    // ---------- Teacher notes (localStorage) ----------
+    const LESSONS_KEY = 'spacescholar_lessons_v1';
+
+    saveNotesBtn.addEventListener('click', () => {
+      const notes = lessonNotes.value.trim();
+      if (!APOD) { alert('No APOD loaded'); return; }
+      const lesson = {
+        date: APOD.date,
+        title: APOD.title,
+        notes,
+        savedAt: new Date().toISOString()
+      };
+      // save into local storage list
+      const arr = JSON.parse(localStorage.getItem(LESSONS_KEY) || '[]');
+      arr.unshift(lesson);
+      localStorage.setItem(LESSONS_KEY, JSON.stringify(arr));
+      alert('Notes saved locally.');
+    });
+
+    clearNotesBtn.addEventListener('click', () => {
+      if (confirm('Clear notes?')) lessonNotes.value = '';
+    });
+
+    saveLessonBtn.addEventListener('click', () => {
+      if (!APOD) { alert('Load an APOD first'); return; }
+      const arr = JSON.parse(localStorage.getItem(LESSONS_KEY) || '[]');
+      const lesson = {
+        date: APOD.date, title: APOD.title, notes: lessonNotes.value.trim(), savedAt: new Date().toISOString()
+      };
+      arr.unshift(lesson);
+      localStorage.setItem(LESSONS_KEY, JSON.stringify(arr));
+      alert('Lesson saved.');
+    });
+
+    // ---------- Contextual Wikipedia ----------
+    viewWikiBtn.addEventListener('click', async () => {
+      if (!APOD) return;
+      wikiResults.classList.add('hidden');
+      wikiResults.innerHTML = '';
+      wikiResults.classList.remove('hidden');
+      wikiResults.textContent = 'Searching Wikipedia for contextual topics…';
+
+      // choose top keyword
+      const kws = (APOD.title + ' ' + APOD.explanation).replace(/[^\w\s]/g,' ').toLowerCase().split(/\s+/).filter(Boolean);
+      const keyword = kws.find(w => w.length > 6) || (APOD.title ? APOD.title.split(' ')[0] : 'astronomy');
+      // try fetch summary
+      try {
+        const page = encodeURIComponent(capitalize(keyword));
+        const resp = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${page}`);
+        if (resp.ok) {
+          const json = await resp.json();
+          wikiResults.innerHTML = `
+            <h4 class="font-semibold mb-2">${json.title}</h4>
+            <p class="text-sm text-slate-300">${json.extract_html || json.extract}</p>
+            <div class="mt-2"><a href="${json.content_urls?.desktop?.page || 'https://en.wikipedia.org/wiki/' + page}" target="_blank" class="text-sky-400">Read more on Wikipedia</a></div>
+          `;
+        } else {
+          wikiResults.innerHTML = `<div class="text-slate-300">No wiki summary found for "${keyword}". <a class="text-sky-400" href="https://en.wikipedia.org/wiki/${page}" target="_blank">Open search</a></div>`;
+        }
+      } catch (err) {
+        wikiResults.innerHTML = `<div class="text-rose-400">Error fetching Wikipedia: ${err.message}</div>`;
+      }
+    });
+
+    // ---------- YouTube button ----------
+    toYoutubeBtn.addEventListener('click', () => {
+      if (!APOD) return;
+      const query = encodeURIComponent(`NASA ${APOD.title}`);
+      window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
+    });
+
+    // ---------- regenerate quiz ----------
+    generateQuizBtn.addEventListener('click', () => {
+      if (!APOD) return;
+      const quiz = buildQuizFromAPOD(APOD);
+      loadQuiz(quiz);
+    });
+
+    // ---------- translations (client-side fallback) ----------
+    langSelect.addEventListener('change', async () => {
+      const lang = langSelect.value;
+      if (!APOD) return;
+      if (lang === 'auto' || lang === 'en') {
+        // original english shown by default
+        apodExplanation.textContent = APOD.explanation || '';
+      } else {
+        if (!TRANSLATE_API_KEY) {
+          // fallback: show link to Google Translate page in new tab
+          const txt = encodeURIComponent(APOD.explanation || '');
+          const url = `https://translate.google.com/?sl=auto&tl=${lang}&text=${txt}&op=translate`;
+          if (confirm('No translation API key set. Open Google Translate in a new tab?')) {
+            window.open(url, '_blank');
+          }
+          return;
+        } else {
+          // NOTE: this is pseudocode for actual API usage. Implement server-side proxy for production.
+          try {
+            apodExplanation.textContent = 'Translating…';
+            const resp = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${TRANSLATE_API_KEY}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ q: APOD.explanation, target: lang })
+            });
+            const json = await resp.json();
+            apodExplanation.textContent = json.data.translations[0].translatedText || APOD.explanation;
+          } catch (err) {
+            apodExplanation.textContent = APOD.explanation;
+            alert('Translation failed.');
+          }
         }
       }
     });
+
+    // ---------- initialization ----------
+    (function init() {
+      const selectedDate = getQueryParam('date') || '';
+      if (!selectedDate) {
+        alert('No date selected — selecting today automatically.');
+      }
+      fetchAPOD(selectedDate);
+
+      // try to pre-load saved lesson for the date (if any)
+      const lessons = JSON.parse(localStorage.getItem(LESSONS_KEY) || '[]');
+      if (selectedDate) {
+        const found = lessons.find(l => l.date === selectedDate);
+        if (found) lessonNotes.value = found.notes || '';
+      }
+
+      // generate initial quiz when APOD loaded (watch APOD variable change)
+      // simple polling: when APOD exists, build the quiz once
+      const waitForAPOD = setInterval(() => {
+        if (APOD) {
+          const q = buildQuizFromAPOD(APOD);
+          loadQuiz(q);
+          clearInterval(waitForAPOD);
+        }
+      }, 250);
+    })();
   </script>
+<!-- chatbot -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const icon = document.getElementById("chatbot-icon");
+    const container = document.getElementById("chatbot-container");
+    const input = document.getElementById("chatbot-input");
+    const send = document.getElementById("chatbot-send");
+    const messages = document.getElementById("chatbot-messages");
+
+    let apodData = {};
+    let chatHistory = [];
+
+    // Toggle chatbot visibility
+    icon.addEventListener("click", () => {
+      container.style.display =
+        container.style.display === "flex" ? "none" : "flex";
+    });
+
+    // Fetch NASA APOD
+    fetch("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+      .then((res) => res.json())
+      .then((data) => {
+        apodData = data;
+        appendMessage(
+          "bot",
+          `👋 Hi! I'm EduBot. Today's NASA APOD is <b>${data.title}</b>. 
+          Ask me about this picture, Mars, or any astronomy topic!`
+        );
+      })
+      .catch((err) => console.error("NASA API error:", err));
+
+    // Handle chat send
+    send.addEventListener("click", handleMessage);
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleMessage();
+    });
+
+    function handleMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+      appendMessage("user", userText);
+      input.value = "";
+      generateResponse(userText);
+    }
+
+    async function generateResponse(userText) {
+      simulateTyping();
+
+      let response = "";
+
+      // APOD-based responses
+      if (/today|apod|picture|image/i.test(userText)) {
+        response = `🪐 Today's APOD is <b>${apodData.title}</b> — ${apodData.explanation.slice(
+          0,
+          280
+        )}...`;
+      }
+
+      // Basic space knowledge
+      const knowledge = {
+        "crab nebula":
+          "The Crab Nebula is the remnant of a supernova that exploded in 1054 AD. It's located in the Taurus constellation and contains a rapidly spinning neutron star called the Crab Pulsar.",
+        mars:
+          "Mars is known as the Red Planet due to its iron-rich dust. It has seasons, polar ice caps, and the tallest volcano in the solar system, Olympus Mons.",
+        jupiter:
+          "Jupiter is the largest planet in our solar system, famous for its Great Red Spot — a massive storm that’s been raging for centuries.",
+        saturn:
+          "Saturn’s rings are made of ice and rock fragments. It has over 80 moons, with Titan being the largest and one of the most Earth-like.",
+      };
+
+      const key = Object.keys(knowledge).find((k) =>
+        userText.toLowerCase().includes(k)
+      );
+      if (!response && key) {
+        response = knowledge[key];
+      }
+
+      // Try a quick web search if no local answer
+      if (!response) {
+        response = await fetchDuckDuckGo(userText);
+      }
+
+      removeTyping();
+      appendMessage(
+        "bot",
+        response ||
+          "I couldn't find a clear answer right now 🌌, but you can check NASA.gov for more!"
+      );
+    }
+
+    // Web search fallback (DuckDuckGo Instant Answer API)
+    async function fetchDuckDuckGo(query) {
+      try {
+        const res = await fetch(
+          `https://api.duckduckgo.com/?q=${encodeURIComponent(
+            query + " astronomy site:nasa.gov"
+          )}&format=json`
+        );
+        const data = await res.json();
+        return (
+          data.AbstractText ||
+          data.RelatedTopics?.[0]?.Text ||
+          ""
+        );
+      } catch (e) {
+        return "";
+      }
+    }
+
+    // Chat visuals
+    function appendMessage(sender, text) {
+      const div = document.createElement("div");
+      div.className = sender;
+      div.innerHTML = text.replace(/\n/g, "<br>");
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function simulateTyping() {
+      const typing = document.createElement("div");
+      typing.className = "bot";
+      typing.id = "typing";
+      typing.textContent = "EduBot is thinking ⋯";
+      messages.appendChild(typing);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeTyping() {
+      const typing = document.getElementById("typing");
+      if (typing) typing.remove();
+    }
+  });
+</script>
+
+<!-- mobile view -->
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const chatbot = document.getElementById("chatbot-container");
+  const chatbotIcon = document.getElementById("chatbot-icon");
+  const apodImage = document.getElementById("apod-image");
+  const apodTitle = document.getElementById("apod-title");
+  const apodExplanation = document.getElementById("apod-explanation");
+
+  // --- 1. Handle responsiveness dynamically ---
+  function adjustLayout() {
+    const width = window.innerWidth;
+
+    if (width <= 480) {
+      chatbot.style.width = "95%";
+      chatbot.style.right = "2.5%";
+      chatbot.style.bottom = "100px";
+      apodImage.style.width = "95%";
+      apodTitle.style.fontSize = "1.1rem";
+      apodExplanation.style.fontSize = "0.9rem";
+    } else if (width <= 768) {
+      chatbot.style.width = "90%";
+      chatbot.style.right = "5%";
+      chatbot.style.bottom = "100px";
+      apodImage.style.width = "90%";
+      apodTitle.style.fontSize = "1.3rem";
+      apodExplanation.style.fontSize = "1rem";
+    } else {
+      chatbot.style.width = "340px";
+      chatbot.style.right = "20px";
+      chatbot.style.bottom = "90px";
+      apodImage.style.width = "600px";
+      apodTitle.style.fontSize = "1.5rem";
+      apodExplanation.style.fontSize = "1rem";
+    }
+  }
+
+  // Call initially and on resize
+  adjustLayout();
+  window.addEventListener("resize", adjustLayout);
+
+  // --- 2. Add keyframe-like JS animations ---
+  function animateElement(element, animation, duration = 500) {
+    element.style.transition = `all ${duration}ms ease`;
+    if (animation === "fadeIn") {
+      element.style.opacity = 0;
+      element.style.transform = "translateY(8px)";
+      requestAnimationFrame(() => {
+        element.style.opacity = 1;
+        element.style.transform = "translateY(0)";
+      });
+    } else if (animation === "slideUp") {
+      element.style.opacity = 0;
+      element.style.transform = "translateY(50px)";
+      requestAnimationFrame(() => {
+        element.style.opacity = 1;
+        element.style.transform = "translateY(0)";
+      });
+    }
+  }
+
+  // --- 3. Floating chatbot icon ---
+  function floatIcon() {
+    let direction = 1;
+    let position = 0;
+    setInterval(() => {
+      position += direction * 0.6;
+      chatbotIcon.style.transform = `translateY(${position}px)`;
+      if (position >= 8 || position <= -8) direction *= -1;
+    }, 30);
+  }
+  floatIcon();
+
+  // --- 4. Animate chatbot when opening ---
+  const icon = document.getElementById("chatbot-icon");
+  icon.addEventListener("click", () => {
+    const isVisible = chatbot.style.display === "flex";
+    chatbot.style.display = isVisible ? "none" : "flex";
+    if (!isVisible) animateElement(chatbot, "slideUp", 500);
+  });
+
+  // --- 5. Animate messages ---
+  const messages = document.getElementById("chatbot-messages");
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.classList?.contains("bot") || node.classList?.contains("user")) {
+          animateElement(node, "fadeIn", 300);
+        }
+      });
+    });
+  });
+  observer.observe(messages, { childList: true });
+});
+</script>
+
 
 </body>
 </html>
