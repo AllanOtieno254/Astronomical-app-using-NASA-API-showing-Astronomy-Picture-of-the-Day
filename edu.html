@@ -631,7 +631,7 @@
     })();
   </script>
 <!-- chatbot -->
-<script>
+<!-- <script>
   document.addEventListener("DOMContentLoaded", () => {
     const icon = document.getElementById("chatbot-icon");
     const container = document.getElementById("chatbot-container");
@@ -762,7 +762,418 @@
       if (typing) typing.remove();
     }
   });
+</script> -->
+<!-- chatbot -->
+<!-- <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const icon = document.getElementById("chatbot-icon");
+  const container = document.getElementById("chatbot-container");
+  const input = document.getElementById("chatbot-input");
+  const send = document.getElementById("chatbot-send");
+  const messages = document.getElementById("chatbot-messages");
+
+  let apodData = {};
+  let knowledgeBase = {};
+
+  //  Load and flatten local knowledge base
+  fetch("./knowledge.json")
+    .then((res) => res.json())
+    .then((data) => {
+      const flat = {};
+      if (data.knowledge_Base) {
+        for (const category in data.knowledge_Base) {
+          const section = data.knowledge_Base[category];
+          for (const key in section) {
+            if (typeof section[key] === "string") {
+              flat[key.toLowerCase()] = section[key];
+            } else if (typeof section[key] === "object") {
+              for (const subkey in section[key]) {
+                flat[subkey.toLowerCase()] = section[key][subkey];
+              }
+            }
+          }
+        }
+      }
+      knowledgeBase = flat;
+      console.log(" Knowledge base loaded:", knowledgeBase);
+    })
+    .catch((err) => console.error("❌ Failed to load knowledge base:", err));
+
+  //  Fetch NASA APOD
+  fetch("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+    .then((res) => res.json())
+    .then((data) => {
+      apodData = data;
+      appendMessage(
+        "bot",
+        `👋 Hi there! I'm <b>EduBot</b> — your space guide for today!  
+        Today's NASA Astronomy Picture of the Day is titled <b>"${data.title}"</b>.  
+        Ask me about this image, Mars, black holes, or any space mystery you’re curious about! 🚀`
+      );
+    })
+    .catch((err) => console.error("NASA API error:", err));
+
+  // 🪐 Chatbot toggle
+  icon.addEventListener("click", () => {
+    container.style.display =
+      container.style.display === "flex" ? "none" : "flex";
+  });
+
+  // 🎤 Chat handling
+  send.addEventListener("click", handleMessage);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") handleMessage();
+  });
+
+  function handleMessage() {
+    const userText = input.value.trim();
+    if (!userText) return;
+    appendMessage("user", userText);
+    input.value = "";
+    generateResponse(userText);
+  }
+
+  // 🌠 Generate response using 3 layers: local → Gemini → web
+  async function generateResponse(userText) {
+    simulateTyping();
+
+    let response = "";
+
+    // 1️Local knowledge match
+    const key = Object.keys(knowledgeBase).find((k) =>
+      userText.toLowerCase().includes(k)
+    );
+    if (key) {
+      response = `🌟 Great question about <b>${key}</b>!  
+      ${knowledgeBase[key]}  
+      <br><br>Would you like me to tell you how this relates to NASA’s current missions?`;
+    }
+
+    // 2️ If not found, check if related to APOD
+    if (!response && /apod|today|picture|photo|image|space/i.test(userText)) {
+      response = `🛰️ Today's APOD is <b>${apodData.title}</b> — ${apodData.explanation.slice(
+        0,
+        280
+      )}...  
+      <br><br>Pretty amazing, right? Want to know if similar phenomena have been seen before?`;
+    }
+
+    // 3️Ask Gemini AI if not found locally
+    if (!response) {
+      const aiReply = await queryGemini(userText);
+      if (aiReply && aiReply.trim() !== "") {
+        response = `🤖 Here's what I found: <br>${aiReply}`;
+      }
+    }
+
+    //  If still empty, try quick web search
+    if (!response || response.trim() === "") {
+      const webAnswer = await fetchDuckDuckGo(userText);
+      if (webAnswer && webAnswer.trim() !== "") {
+        response = `🔭 I looked around and found this: <br>${webAnswer}`;
+      }
+    }
+
+    // 5️ Fallback message
+    if (!response) {
+      response = `Hmm, I couldn't find that right now 🌌 — but NASA’s archives might have more info. Try asking differently!`;
+    }
+
+    removeTyping();
+    appendMessage("bot", response);
+  }
+
+  // 🔮 Gemini AI Integration
+  async function queryGemini(prompt) {
+    const GEMINI_KEY = "AIzaSyAA0mTqF8IvW_jUp7WOsJ_fP6xtg9Xgir8"; // your Gemini key
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+          }),
+        }
+      );
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } catch (e) {
+      console.error("Gemini error:", e);
+      return "";
+    }
+  }
+
+  // 🌍 Fallback Web Search
+  async function fetchDuckDuckGo(query) {
+    try {
+      const res = await fetch(
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(
+          query + " site:nasa.gov"
+        )}&format=json`
+      );
+      const data = await res.json();
+      return data.AbstractText || data.RelatedTopics?.[0]?.Text || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  // 💬 Chat visuals
+  function appendMessage(sender, text) {
+    const div = document.createElement("div");
+    div.className = sender;
+    div.innerHTML = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function simulateTyping() {
+    const typing = document.createElement("div");
+    typing.className = "bot";
+    typing.id = "typing";
+    typing.textContent = "EduBot is thinking ⋯";
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
+  }
+});
+</script> -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const icon = document.getElementById("chatbot-icon");
+  const container = document.getElementById("chatbot-container");
+  const input = document.getElementById("chatbot-input");
+  const send = document.getElementById("chatbot-send");
+  const messages = document.getElementById("chatbot-messages");
+
+  let apodData = {};
+  let chatHistory = [];
+
+  // 🛰️ Knowledge Base
+  const knowledgeBase = {
+    topics: {
+      "crab nebula": {
+        keywords: ["crab nebula", "nebula crab", "taurus nebula"],
+        info: "The Crab Nebula is the remnant of a supernova that exploded in 1054 AD. It's located in the Taurus constellation and contains a rapidly spinning neutron star called the Crab Pulsar.",
+      },
+      mars: {
+        keywords: ["mars", "red planet"],
+        info: "Mars is known as the Red Planet due to its iron-rich dust. It has seasons, polar ice caps, and the tallest volcano in the solar system, Olympus Mons.",
+      },
+      jupiter: {
+        keywords: ["jupiter", "largest planet"],
+        info: "Jupiter is the largest planet in our solar system, famous for its Great Red Spot — a massive storm that’s been raging for centuries.",
+      },
+      saturn: {
+        keywords: ["saturn", "rings of saturn"],
+        info: "Saturn’s rings are made of ice and rock fragments. It has over 80 moons, with Titan being the largest and one of the most Earth-like.",
+      },
+    },
+
+    nasa: {
+      definition:
+        "NASA (National Aeronautics and Space Administration) is the United States space agency focused on aeronautics, space exploration, and scientific discovery.",
+      mission_types: [
+        "Human spaceflight",
+        "Robotic missions",
+        "Technology demonstration",
+        "Heliophysics research",
+      ],
+      major_programs: [
+        "Artemis Program",
+        "Commercial Crew Program",
+        "Mars Exploration Program",
+        "Earth Observation Program",
+        "James Webb Space Telescope (JWST)",
+      ],
+    },
+
+    astronomy: {
+      star: "A self-luminous sphere of plasma powered by nuclear fusion.",
+      galaxy:
+        "A gravitationally bound system of stars, gas, dust, and dark matter.",
+      exoplanet:
+        "A planet orbiting a star beyond our solar system, often detected using light variations.",
+      black_hole:
+        "A region of spacetime with gravity so strong that not even light can escape.",
+      solar_system:
+        "The Sun and all celestial bodies bound to it by gravity, including planets, moons, asteroids, and comets.",
+    },
+
+    physics: {
+      fusion:
+        "The nuclear process where lighter elements combine into heavier ones, releasing energy — this powers stars.",
+      light_year:
+        "The distance light travels in one year, approximately 9.46 trillion kilometers.",
+      astronomical_unit:
+        "The average distance between Earth and the Sun, about 150 million kilometers.",
+      redshift:
+        "An increase in the wavelength of light due to an object moving away, used to measure cosmic expansion.",
+    },
+
+    exploration: {
+      apollo:
+        "A series of U.S. lunar missions (1960s–70s) that landed the first humans on the Moon.",
+      artemis:
+        "NASA's modern lunar program aiming to return humans to the Moon and prepare for Mars exploration.",
+      voyager:
+        "Twin spacecraft launched in 1977 to explore the outer planets — now in interstellar space.",
+      hubble:
+        "A space telescope launched in 1990, capturing visible and ultraviolet light from distant galaxies.",
+      jwst:
+        "The James Webb Space Telescope observes infrared light to study early galaxies and exoplanets.",
+    },
+  };
+
+  // 🔍 Fuzzy Matching Utility (simple version)
+  function findClosestMatch(input, categories) {
+    const words = input.toLowerCase().split(/\s+/);
+    for (const [key, value] of Object.entries(categories)) {
+      if (key.toLowerCase().includes(input)) return value;
+      if (value.keywords?.some(k => input.includes(k))) return value.info;
+      if (words.some(w => key.includes(w))) return value;
+    }
+    return null;
+  }
+
+  // 🤖 Knowledge-Based Answer Generator
+  function getAnswer(userInput) {
+    const text = userInput.toLowerCase();
+
+    // 1️⃣ Core Topics
+    const topicMatch = findClosestMatch(text, knowledgeBase.topics);
+    if (topicMatch?.info) return topicMatch.info;
+
+    // 2️⃣ NASA Section
+    if (text.includes("nasa"))
+      return (
+        knowledgeBase.nasa.definition +
+        "<br><b>Major Programs:</b> " +
+        knowledgeBase.nasa.major_programs.join(", ")
+      );
+
+    // 3️⃣ Astronomy Terms
+    const astroMatch = findClosestMatch(text, knowledgeBase.astronomy);
+    if (typeof astroMatch === "string") return astroMatch;
+
+    // 4️⃣ Physics
+    const physicsMatch = findClosestMatch(text, knowledgeBase.physics);
+    if (typeof physicsMatch === "string") return physicsMatch;
+
+    // 5️⃣ Exploration
+    const exploreMatch = findClosestMatch(text, knowledgeBase.exploration);
+    if (typeof exploreMatch === "string") return exploreMatch;
+
+    return null;
+  }
+
+  // 🪐 Fetch NASA APOD (Astronomy Picture of the Day)
+  fetch("https://api.nasa.gov/planetary/apod?api_key=KsHi59MzcNF0ahRnjGEQAxcQP92yfGQJdpchdTC4")
+    .then(res => res.json())
+    .then(data => {
+      apodData = data;
+      appendMessage(
+        "bot",
+        `👋 Hi! I'm EduBot. Today's NASA APOD is <b>${data.title}</b>. <br>Ask me about it, or about any space topic like Mars, black holes, or NASA missions!`
+      );
+    })
+    .catch(err => console.error("NASA API error:", err));
+
+  // 💬 Chat Input Handler
+  send.addEventListener("click", handleMessage);
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") handleMessage();
+  });
+
+  function handleMessage() {
+    const userText = input.value.trim();
+    if (!userText) return;
+    appendMessage("user", userText);
+    input.value = "";
+    generateResponse(userText);
+  }
+
+  async function generateResponse(userText) {
+    simulateTyping();
+
+    let response = "";
+
+    // 1️⃣ APOD
+    if (/today|apod|picture|image|photo/i.test(userText)) {
+      response = `📸 <b>${apodData.title}</b><br>${apodData.explanation.slice(
+        0,
+        250
+      )}...<br><a href="${apodData.url}" target="_blank">View Image</a>`;
+    }
+
+    // 2️⃣ Local Knowledge
+    if (!response) response = getAnswer(userText);
+
+    // 3️⃣ Web fallback if still not found
+    if (!response) response = await fetchDuckDuckGo(userText);
+
+    removeTyping();
+    appendMessage(
+      "bot",
+      response ||
+        "Hmm, I couldn’t find that 🌌. Try asking about planets, NASA, or today’s APOD!"
+    );
+  }
+
+  // 🌐 DuckDuckGo fallback
+  async function fetchDuckDuckGo(query) {
+    try {
+      const res = await fetch(
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(
+          query + " site:nasa.gov"
+        )}&format=json`
+      );
+      const data = await res.json();
+      return data.AbstractText || data.RelatedTopics?.[0]?.Text || "";
+    } catch {
+      return "";
+    }
+  }
+
+  // 🧩 Chat Visuals
+  function appendMessage(sender, text) {
+    const div = document.createElement("div");
+    div.className = sender;
+    div.innerHTML = text.replace(/\n/g, "<br>");
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function simulateTyping() {
+    const typing = document.createElement("div");
+    typing.className = "bot";
+    typing.id = "typing";
+    typing.textContent = "EduBot is thinking ⋯";
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
+  }
+
+  // 💬 Toggle chatbot window
+  icon.addEventListener("click", () => {
+    container.style.display =
+      container.style.display === "flex" ? "none" : "flex";
+  });
+});
 </script>
+
+
+
 
 <!-- mobile view -->
  <script>
